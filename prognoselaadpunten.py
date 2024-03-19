@@ -143,7 +143,7 @@ st.write('  4)  Aantal DC snellaadpunten ')
 
 # Filter het DataFrame op basis van geselecteerde kolommen
 # Zorg dat 'Jaar' altijd geselecteerd is, aangezien dit nodig is voor de x-as
-filtered_data = gefilterde_df[selected_columns]
+filtered_data = gefilterde_df
 gefilterde_df = gefilterde_df.round(0)
 filtered_data = filtered_data.round(0)
 
