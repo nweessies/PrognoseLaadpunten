@@ -136,15 +136,9 @@ st.write('  1)  Thuislaadpunten ')
 st.write('  2)  Werklaadpunten ')         
 st.write('  3)  (semi)Publiekelaadpunten ')
 st.write('  4)  Aantal DC snellaadpunten ')
-st.write("In het selectievenster boven figuur 2 kun je type laadpunten in- of uitschakelen. ")         
+        
 
-# Multi-select widget voor het selecteren van kolommen
-st.write("###")
-st.write("###")
-st.write("###")
-selected_columns = st.multiselect('Selecteer het type laadpunten voor de prognose:',
-                                options=gefilterde_df.columns.tolist(),  # Alle kolommen als opties
-                                default=['Jaar', 'gemeente', 'thuislaadpunten', 'publiekelaadpunten', 'werklaadpunten', 'snellaadpunten'])  # Standaard alle kolommen geselecteerd
+
 
 
 # Filter het DataFrame op basis van geselecteerde kolommen
