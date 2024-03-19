@@ -7,6 +7,7 @@ import plotly.express as px
 import json
 import folium
 from streamlit_folium import folium_static
+from folium import Choropleth, LayerControl
 
 df_groei = pd.read_csv(r'groeiscenarios.csv', sep=';', decimal=',')
 df_groei = df_groei.set_index('Scenario')
@@ -111,7 +112,7 @@ with col2:
 
 with col1: 
 
-    st.write("In de meest recente uitgave van de Elaad Outlook hebben onze onderzoekers de toekomstverwachtingen voor elektrische personenauto's en de daarvoor vereiste laadinfrastructuur herzien. "
+    st.write("In de meest recente uitgave van de Elaad Outlook hebben onderzoekers de toekomstverwachtingen voor elektrische personenauto's en de daarvoor vereiste laadinfrastructuur herzien. "
              "Voor deze update hebben zij een grondige analyse uitgevoerd van de nieuwste ontwikkelingen in de markt en de nieuw beschikbare gegevens over elektrische voertuigen bestudeerd. "
              "Aan de hand hiervan zijn de verwachte groei en de verspreiding van elektrische auto's en de benodigde laadpunten verfijnd en geactualiseerd. ")
     st.write("Het model rekent met drie verschillende scenario's: 'Hoog', 'Midden' en 'Laag', waarbij het hoge scenario de sterkste groei in elektrische voertuigen en laadpalen voorspeld. "
@@ -185,24 +186,57 @@ df_2030 = df_2030.set_index('buurtnaam')
 st.subheader('Prognose laadpunten op buurtniveau')
 
 
-buurten = gefilterde_df['buurtnaam'].unique().tolist()
-buurt_keuze = st.selectbox('Selecteer een buurt:', buurten)
-gefilterde_buurt_df = gefilterde_df[gefilterde_df['buurtnaam'] == buurt_keuze]
-
 col1, col2 = st.columns(2)
 
 with col2:
-    fig = px.bar(gefilterde_buurt_df, x='Jaar', y='publiekelaadpunten')
-    fig.update_traces()
-    fig.update_layout(uniformtext_minsize=8, uniformtext_mode='hide',
-                        xaxis_tickangle=-45,
-                        title_text='Figuur 3. Prognose aantal (semi)publieke laadpunten per buurt',
-                        xaxis_title="Buurt",
-                        yaxis_title= "Aantal laadpunten 2024-2030",
-                        width=600,
-                        height=600)
-    st.plotly_chart(fig)
+    verschil_laadpunten = df_2030['publiekelaadpunten'] - df_2024['publiekelaadpunten']
+    verschil_laadpunten = pd.DataFrame(verschil_laadpunten)
+    verschil_laadpunten = verschil_laadpunten.rename(columns={'publiekelaadpunten': 'groei (semi)publiekelaadpunten 2024 - 2030'})
+    verschil_laadpunten['groei (semi)publiekelaadpunten 2024 - 2030'] = pd.to_numeric(verschil_laadpunten['groei (semi)publiekelaadpunten 2024 - 2030'], errors='coerce')
+    verschil_laadpunten_sorted = verschil_laadpunten.sort_values(by='groei (semi)publiekelaadpunten 2024 - 2030', ascending=True)
+    fig = px.bar(verschil_laadpunten_sorted, x=verschil_laadpunten_sorted.index, y='groei (semi)publiekelaadpunten 2024 - 2030')
 
+    #KAART
+    import geopandas as gpd
+
+    # Laad het GeoJSON-bestand
+    gdf = gpd.read_file('aangepaste_buurt_2023.geojson')
+    # Converteer de geometry kolom naar strings vóór de samenvoeging
+    gdf['geometry_str'] = gdf['geometry'].astype(str)
+    # Voer je analyse of bewerkingen uit
+    merged_df_verschil = df.query("Jaar == 2030 & gemeente == @gemeente_keuze")
+    merged_df_verschil = pd.merge(merged_df_verschil, verschil_laadpunten, on='buurtnaam', how='inner')
+    # Zorg dat 'gdf' het GeoDataFrame is en 'merged_df_verschil' het pandas DataFrame
+    # Merk op dat voor de merge de oorspronkelijke 'geometry' kolom gebruikt wordt, niet 'geometry_str'
+    merged_gdf_geo = gpd.GeoDataFrame(pd.merge(gdf, merged_df_verschil, left_on='statcode', right_on='bu_code', how='inner'), geometry='geometry')
+    # Als je de samengevoegde gegevens wilt tonen met de string-representatie van de geometrie, 
+    # converteer dan de 'geometry' kolom opnieuw naar strings. Anders, sla deze stap over.
+    merged_gdf_geo['geometry_str'] = merged_gdf_geo['geometry'].astype(str)
+    merged_gdf_geo['groei (semi)publiekelaadpunten 2024 - 2030'] = pd.to_numeric(merged_gdf_geo['groei (semi)publiekelaadpunten 2024 - 2030'], errors='coerce')
+    # Zorg ervoor dat je GeoDataFrame 'geometry' kolom in geojson formaat is
+    gdf_json = merged_gdf_geo.to_crs(epsg=4326).__geo_interface__
+
+    # Maak de interactieve kaart
+    fig = px.choropleth(merged_gdf_geo,
+                        geojson=gdf_json,
+                        locations=merged_gdf_geo.index,
+                        hover_name='statnaam',
+                        color='groei (semi)publiekelaadpunten 2024 - 2030',
+                        color_continuous_scale="YlOrBr",
+                        range_color=(0, 12),
+                        labels={'groei (semi)publiekelaadpunten 2024 - 2030':'Groei Laadpunten'}
+                    )
+
+    # Update de layout om een meer geschikte kaartprojectie en zoomniveau te kiezen
+    fig.update_geos(fitbounds="locations", visible=False)
+    fig.update_geos(
+        projection_type="mercator",  # Pas aan afhankelijk van voorkeur
+        fitbounds="locations"
+    )
+    fig.update_layout(margin={"r":0,"t":0,"l":0,"b":0})
+
+    # Toon de kaart in Streamlit
+    st.plotly_chart(fig)
 with col1:
         st.write("Er zit een groot verschil in de spreiding van de groei van laadpunten per buurt. In sommige buurten zal de groei in laadpunten niet of nauwelijks plaatsvinden, "
          f"terwijl in anderen buurten het aantal laadpunten met tientallen procenten zal toenemen. In figuur 3 is te de prognose voor het aantal laadpunten per voor {buurt_keuze} te zien. "
@@ -212,38 +246,18 @@ with col1:
     
 
 #Bereken het verschil in laadpunten tussen 2030 en 2024 voor elke buurt
-verschil_laadpunten = df_2030['publiekelaadpunten'] - df_2024['publiekelaadpunten']
-verschil_laadpunten = pd.DataFrame(verschil_laadpunten)
-verschil_laadpunten = verschil_laadpunten.rename(columns={'publiekelaadpunten': 'groei (semi)publiekelaadpunten 2024 - 2030'})
-verschil_laadpunten['groei (semi)publiekelaadpunten 2024 - 2030'] = pd.to_numeric(verschil_laadpunten['groei (semi)publiekelaadpunten 2024 - 2030'], errors='coerce')
-verschil_laadpunten_sorted = verschil_laadpunten.sort_values(by='groei (semi)publiekelaadpunten 2024 - 2030', ascending=True)
-fig = px.bar(verschil_laadpunten_sorted, x=verschil_laadpunten_sorted.index, y='groei (semi)publiekelaadpunten 2024 - 2030')
 
+buurten = gefilterde_df['buurtnaam'].unique().tolist()
+buurt_keuze = st.selectbox('Selecteer een buurt:', buurten)
+gefilterde_buurt_df = gefilterde_df[gefilterde_df['buurtnaam'] == buurt_keuze]
 
-
-# De plot aanpassen
+fig = px.bar(gefilterde_buurt_df, x='Jaar', y='publiekelaadpunten')
 fig.update_traces()
 fig.update_layout(uniformtext_minsize=8, uniformtext_mode='hide',
-                    xaxis_tickangle=-45,
-                    title_text='Figuur 4. Absolute toename van het aantal (semi)publiekelaadpunten op buurtniveau tussen 2024 en 2030',
-                    xaxis_title="Buurt",
-                    yaxis_title="Toename aantal laadpunten 2024-2030",
-                    width=1200,
-                    height=600)
-
-# De figuur tonen
+                        xaxis_tickangle=-45,
+                        title_text='Figuur 3. Prognose aantal (semi)publieke laadpunten per buurt',
+                        xaxis_title="Buurt",
+                        yaxis_title= "Aantal laadpunten 2024-2030",
+                        width=600,
+                        height=600)
 st.plotly_chart(fig)
-
-
-st.dataframe(verschil_laadpunten)
-import geopandas as gpd
-
-# Laad je DataFrame
-
-# Laad het GeoJSON-bestand
-gdf = gpd.read_file('aangepaste_buurt_2023.geojson')
-st.write(gdf)
-merged_df_verschil = df.query("Jaar == 2030 & gemeente == @gemeente_keuze")
-merged_df_verschil = pd.merge(merged_df_verschil, verschil_laadpunten, on='buurtnaam', how='inner')
-merged_gdf_geo = gdf.merge(merged_df_verschil, left_on='statcode', right_on='bu_code')
-st.dataframe(merged_gdf_geo)
