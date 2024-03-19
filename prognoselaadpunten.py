@@ -119,7 +119,8 @@ with col1:
              "De drie scenario's zijn gebasseerd op het jaartal waarin de instroom van nieuweverkopen en de instroom in het wagenpark 100% elektrisch zijn. "
              "De belangrijkste uitganspunten van de groeiscenario's zijn te zien in tabel 1. ")
     st.write("De overige, onderliggende annames per scenario staan omschreven in het [ElaadNL rapport](https://elaad.nl/wp-content/uploads/downloads/ElaadNL_Outlook_Personenautos_2024_def.pdf). ")
-             
+    df_groei= df_groei.astype(int)
+
     st.dataframe(df_groei, use_container_width=True)
     st.write("In het bovenstaande selectievenster kun je kiezen voor één van de drie scenario's waarna de figuren worden geupdate. ")
 
