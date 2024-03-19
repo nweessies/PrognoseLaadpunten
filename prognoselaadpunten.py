@@ -184,11 +184,22 @@ df_2030 = df_2030.set_index('buurtnaam')
 
 
 st.subheader('Prognose laadpunten op buurtniveau')
+col1, col2 = st.columns(2)
+with col1:
+    st.write("Er zit een groot verschil in de spreiding van de groei van laadpunten per buurt. In sommige buurten zal de groei in laadpunten niet of nauwelijks plaatsvinden, "
+    f"terwijl in anderen buurten het aantal laadpunten met tientallen procenten zal toenemen. In figuur 4 is te de prognose voor het aantal laadpunten per buurt met een staafgrafiek te zien te zien. "
+    f"In figuur 3 is te zien in welke buurten van {gemeente_keuze} "
+    "de groei aan laadpunten het sterkst zal zijn. Hoe donkerder de kleur, hoe groter de groei van het aantal laadpunten tussen 2024 en 2043. In figuur 3 is alleen rekening gehouden met het aantal (semi)publieke laadpunten. ")
+    st.write("###")
+    st.write("###")
+    st.write("###")
+with col2:
+    st.write()
 
 
 col1, col2 = st.columns(2)
 
-with col2:
+with col1:
     verschil_laadpunten = df_2030['publiekelaadpunten'] - df_2024['publiekelaadpunten']
     verschil_laadpunten = pd.DataFrame(verschil_laadpunten)
     verschil_laadpunten = verschil_laadpunten.rename(columns={'publiekelaadpunten': 'groei (semi)publiekelaadpunten 2024 - 2030'})
@@ -217,12 +228,13 @@ with col2:
     gdf_json = merged_gdf_geo.to_crs(epsg=4326).__geo_interface__
 
     # Maak de interactieve kaart
+    st.write('**Figuur 3. Groei van het aantal (semi)publiekelaadpunten tussen 2024 en 2030**')
     fig = px.choropleth(merged_gdf_geo,
                         geojson=gdf_json,
                         locations=merged_gdf_geo.index,
                         hover_name='statnaam',
                         color='groei (semi)publiekelaadpunten 2024 - 2030',
-                        color_continuous_scale="YlOrBr",
+                        color_continuous_scale="YlOrRd",
                         range_color=(0, 12),
                         labels={'groei (semi)publiekelaadpunten 2024 - 2030':'Groei Laadpunten'}
                     )
@@ -237,27 +249,20 @@ with col2:
 
     # Toon de kaart in Streamlit
     st.plotly_chart(fig)
-with col1:
-        st.write("Er zit een groot verschil in de spreiding van de groei van laadpunten per buurt. In sommige buurten zal de groei in laadpunten niet of nauwelijks plaatsvinden, "
-         f"terwijl in anderen buurten het aantal laadpunten met tientallen procenten zal toenemen. In figuur 4 is te de prognose voor het aantal laadpunten per buurt met een staafgrafiek te zien te zien. "
-         f"In figuur 3 is te zien in welke buurten van {gemeente_keuze} "
-         "de groei aan laadpunten het sterkst zal zijn. Hoe donkerder de kleur, hoe groter de groei van het aantal laadpunten tussen 2024 en 2043. In figuur 3 is alleen rekening gehouden met het aantal (semi)publieke laadpunten. ")
-
-    
 
 #Bereken het verschil in laadpunten tussen 2030 en 2024 voor elke buurt
+with col2: 
+    buurten = gefilterde_df['buurtnaam'].unique().tolist()
+    buurt_keuze = st.selectbox('Selecteer een buurt:', buurten)
+    gefilterde_buurt_df = gefilterde_df[gefilterde_df['buurtnaam'] == buurt_keuze]
 
-buurten = gefilterde_df['buurtnaam'].unique().tolist()
-buurt_keuze = st.selectbox('Selecteer een buurt:', buurten)
-gefilterde_buurt_df = gefilterde_df[gefilterde_df['buurtnaam'] == buurt_keuze]
-
-fig = px.bar(gefilterde_buurt_df, x='Jaar', y='publiekelaadpunten')
-fig.update_traces()
-fig.update_layout(uniformtext_minsize=8, uniformtext_mode='hide',
-                        xaxis_tickangle=-45,
-                        title_text='Figuur 3. Prognose aantal (semi)publieke laadpunten per buurt',
-                        xaxis_title="Buurt",
-                        yaxis_title= "Aantal laadpunten 2024-2030",
-                        width=600,
-                        height=600)
-st.plotly_chart(fig)
+    fig = px.bar(gefilterde_buurt_df, x='Jaar', y='publiekelaadpunten')
+    fig.update_traces()
+    fig.update_layout(uniformtext_minsize=8, uniformtext_mode='hide',
+                            xaxis_tickangle=-45,
+                            title_text='Figuur 4. Prognose aantal (semi)publieke laadpunten per buurt',
+                            xaxis_title="Buurt",
+                            yaxis_title= "Aantal laadpunten 2024-2030",
+                            width=600,
+                            height=600)
+    st.plotly_chart(fig)
