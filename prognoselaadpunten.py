@@ -115,8 +115,8 @@ with col1:
              "Voor deze update hebben zij een grondige analyse uitgevoerd van de nieuwste ontwikkelingen in de markt en de nieuw beschikbare gegevens over elektrische voertuigen bestudeerd. "
              "Aan de hand hiervan zijn de verwachte groei en de verspreiding van elektrische auto's en de benodigde laadpunten verfijnd en geactualiseerd. ")
     st.write("Het model rekent met drie verschillende scenario's: 'Hoog', 'Midden' en 'Laag', waarbij het hoge scenario de sterkste groei in elektrische voertuigen en laadpalen voorspeld. "
-             "De drie scenario's zijn gebasseerd op het jaartal waarin de instroom van nieuweverkopen en de instroom in het wagenpark 100% elektrisch zijn. ")
-             "De belangrijkste uitganspunten van de groeiscenario's zijn te zien in tabel 1. "
+             "De drie scenario's zijn gebasseerd op het jaartal waarin de instroom van nieuweverkopen en de instroom in het wagenpark 100% elektrisch zijn. "
+             "De belangrijkste uitganspunten van de groeiscenario's zijn te zien in tabel 1. ")
              
     st.dataframe(df_groei, use_container_width=True)
     st.write("In het bovenstaande selectievenster kun je kiezen voor één van de drie scenario's waarna de figuren worden geupdate. ")
