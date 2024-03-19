@@ -241,7 +241,7 @@ with col1:
         st.write("Er zit een groot verschil in de spreiding van de groei van laadpunten per buurt. In sommige buurten zal de groei in laadpunten niet of nauwelijks plaatsvinden, "
          f"terwijl in anderen buurten het aantal laadpunten met tientallen procenten zal toenemen. In figuur 4 is te de prognose voor het aantal laadpunten per buurt met een staafgrafiek te zien te zien. "
          f"In figuur 3 is te zien in welke buurten van {gemeente_keuze} "
-         "de groei aan laadpunten het sterkst zal zijn. In dit figuur is alleen rekening gehouden met het aantal (semi)publieke laadpunten. ")
+         "de groei aan laadpunten het sterkst zal zijn. Hoe donkerder de kleur, hoe groter de groei van het aantal laadpunten tussen 2024 en 2043. In figuur 3 is alleen rekening gehouden met het aantal (semi)publieke laadpunten. ")
 
     
 
