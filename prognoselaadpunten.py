@@ -239,9 +239,9 @@ with col2:
     st.plotly_chart(fig)
 with col1:
         st.write("Er zit een groot verschil in de spreiding van de groei van laadpunten per buurt. In sommige buurten zal de groei in laadpunten niet of nauwelijks plaatsvinden, "
-         f"terwijl in anderen buurten het aantal laadpunten met tientallen procenten zal toenemen. In figuur 3 is te de prognose voor het aantal laadpunten per voor {buurt_keuze} te zien. "
-         f"In figuur 4 is te zien in welke buurten van {gemeente_keuze} "
-         "de groei aan laadpunten het sterkst zal zijn. In deze grafiek is alleen rekening gehouden met het aantal (semi)publieke laadpunten. ")
+         f"terwijl in anderen buurten het aantal laadpunten met tientallen procenten zal toenemen. In figuur 4 is te de prognose voor het aantal laadpunten per buurt met een staafgrafiek te zien te zien. "
+         f"In figuur 3 is te zien in welke buurten van {gemeente_keuze} "
+         "de groei aan laadpunten het sterkst zal zijn. In dit figuur is alleen rekening gehouden met het aantal (semi)publieke laadpunten. ")
 
     
 
